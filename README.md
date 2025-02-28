@@ -3,7 +3,7 @@
 > 🤖 基于通义千问大模型的智能 OCR 识别工具
 
 ## 项目展示
-![home](images/home.png)
+![home](images/homepage.png)
 
 ## ✨ 特性
 
@@ -56,16 +56,16 @@
 ## 🎨 功能展示
 
 ### 文本识别
-![ocr text](images/text.png)
+![ocr text](images/ocr_text.png)
 
 ### 识别结果翻译
 ![ocr translate](images/trans.png)
 
 ### LaTeX 公式识别
-![ocr latex](images/latex.png)
+![ocr latex](images/ocr_latex.png)
 
 ### 代码识别
-![ocr code](images/code.png)
+![ocr code](images/ocr_code.png)
 
 ### 目标检测
 ![ocr detect](images/detect.png)
@@ -75,7 +75,7 @@
 1. 获取通义千问 API Token：
    - 访问 [通义千问开放平台](https://chat.qwenlm.ai)
    - F12 打开控制台-应用，token 字段就是需要的 key
-![token](images/token.png)
+![token](images/get_token.png)
 
 2. 配置插件：
    - 点击插件界面的"插件设置"

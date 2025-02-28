@@ -1,633 +1,242 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Qwen OCR</title>
-  <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: #f5f7fa;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .container {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      width: 95%;
-      max-width: 1200px;
-      height: auto;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panels-container {
-      display: flex;
-      gap: 2rem;
-      flex: 1;
-      margin-bottom: 1.5rem;
-    }
-
-    .panel {
-      flex: 1;
-      border: 2px dashed #e2e8f0;
-      border-radius: 8px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      background: #f8fafc;
-      min-height: 300px;
-    }
-
-    .panel:hover {
-      border-color: #3b82f6;
-      background: #f1f5f9;
-    }
-
-    .panel-title {
-      font-size: 1.1rem;
-      color: #64748b;
-      margin-bottom: 1rem;
-    }
-
-    .buttons-container {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-
-    .btn {
-      padding: 0.75rem 2rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: #f1f5f9;
-      color: #1e293b;
-      border: 1px solid #e2e8f0;
-    }
-
-    .btn:hover {
-      background: #e2e8f0;
-      transform: translateY(-1px);
-    }
-
-    #previewImage {
-      max-width: 100%;
-      max-height: 80%;
-      object-fit: contain;
-      display: none;
-    }
-
-    .result-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      min-height: 200px;
-    }
-
-    #result {
-      width: 100%;
-      height: 100%;
-      white-space: pre-wrap;
-      overflow-y: auto;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #334155;
-    }
-
-    #loadingSpinner {
-      display: none;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 100;
-    }
-
-    .upload-text {
-      color: #64748b;
-      text-align: center;
-      font-size: 1rem;
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-overlay.show {
-      display: flex;
-    }
-
-    .modal {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #64748b;
-      padding: 0.5rem;
-    }
-
-    .modal-close:hover {
-      color: #1e293b;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .form-help {
-      font-size: 0.875rem;
-      color: #94a3b8;
-      margin-top: 0.5rem;
-    }
-
-    .save-settings {
-      width: 100%;
-      padding: 0.75rem;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .save-settings:hover {
-      background: #2563eb;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #1e293b;
-      }
-      
-      .container {
-        background: #0f172a;
-      }
-
-      .panel {
-        background: #1e293b;
-        border-color: #334155;
-      }
-
-      .panel:hover {
-        border-color: #3b82f6;
-        background: #1e293b;
-      }
-
-      .panel-title {
-        color: #94a3b8;
-      }
-
-      .btn {
-        background: #1e293b;
-        color: #e2e8f0;
-        border-color: #334155;
-      }
-
-      .btn:hover {
-        background: #334155;
-      }
-
-      .upload-text {
-        color: #94a3b8;
-      }
-
-      #result {
-        color: #e2e8f0;
-      }
-
-      .modal {
-        background: #1e293b;
-      }
-
-      .modal-title {
-        color: #f1f5f9;
-      }
-
-      .form-input {
-        background: #0f172a;
-        border-color: #334155;
-        color: #f1f5f9;
-      }
-
-      .form-input:focus {
-        border-color: #3b82f6;
-      }
-
-      .form-label {
-        color: #94a3b8;
-      }
-
-      #loadingSpinner {
-        border-color: #334155;
-        border-top-color: #3b82f6;
-      }
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通义千问OCR</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="panels-container">
-      <div class="panel" id="uploadArea">
-        <div class="upload-text" id="uploadText">
-          拖拽图片到这里，或点击上传<br>
-          支持复制粘贴图片
+    <div class="container">
+        <div class="panels-container">
+            <div class="panel upload-panel" id="uploadArea">
+                <div class="upload-content" id="uploadContent">
+                    <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <div class="upload-text" id="uploadText">
+                        拖拽图片到这里，或点击上传
+                        <small>支持复制粘贴图片</small>
+                    </div>
+                </div>
+                <img id="previewImage">
+            </div>
+            <div class="panel result-panel">
+                <div class="result-container">
+                    <div id="result"></div>
+                    <div id="loadingSpinner"></div>
+                </div>
+            </div>
         </div>
-        <img id="previewImage">
-      </div>
-      <div class="panel">
-        <div class="result-container">
-          <div id="result"></div>
-          <div id="loadingSpinner"></div>
+        <div class="buttons-container">
+            <!-- 系统功能组 -->
+            <div class="button-group">
+                <button class="btn btn-secondary" id="settingsBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                        <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
+                    </svg>
+                    插件设置
+                </button>
+                <button class="btn btn-secondary" id="clearBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                    </svg>
+                    一键清除
+                </button>
+            </div>
+
+            <!-- OCR功能组 -->
+            <div class="button-group">
+                <button class="btn btn-primary" id="screenshotBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
+                        <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                    </svg>
+                    截图识别
+                </button>
+                <button class="btn btn-primary" id="retranslateBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+                    </svg>
+                    重新识别
+                </button>
+            </div>
+
+            <!-- 文本处理组 -->
+            <div class="button-group">
+                <button class="btn btn-primary" id="copyBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                    </svg>
+                    一键复制
+                </button>
+                <div class="translate-group">
+                    <button class="btn btn-primary translate-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286H4.545zm1.634-.736L5.5 3.956h-.049l-.679 2.022H6.18z"/>
+                            <path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2zm7.138 9.995c.193.301.402.583.63.846-.748.575-1.673 1.001-2.768 1.292.178.217.451.635.555.867 1.125-.359 2.08-.844 2.886-1.494.777.665 1.739 1.165 2.93 1.472.133-.254.414-.673.629-.89-1.125-.253-2.057-.694-2.82-1.284.681-.747 1.222-1.651 1.621-2.757H14V8h-3v1.047h.765c-.318.844-.74 1.546-1.272 2.13a6.066 6.066 0 0 1-.415-.492 1.988 1.988 0 0 1-.94.31z"/>
+                        </svg>
+                        翻译文本
+                    </button>
+                    <button class="btn btn-primary translate-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                        </svg>
+                    </button>
+                    <div class="translate-dropdown">
+                        <div class="translate-dropdown-item" data-lang="ZH">中文</div>
+                        <div class="translate-dropdown-item" data-lang="EN">英文</div>
+                        <div class="translate-dropdown-item" data-lang="JA">日语</div>
+                        <div class="translate-dropdown-item" data-lang="KO">韩语</div>
+                        <div class="translate-dropdown-item" data-lang="FR">法语</div>
+                        <div class="translate-dropdown-item" data-lang="DE">德语</div>
+                        <div class="translate-dropdown-item" data-lang="ES">西班牙语</div>
+                        <div class="translate-dropdown-item" data-lang="RU">俄语</div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-    <div class="buttons-container">
-      <button class="btn" id="settingsBtn">插件设置</button>
-      <button class="btn" id="retranslateBtn">重新识别</button>
-      <button class="btn" id="copyBtn">一键复制</button>
-      <button class="btn" id="clearBtn">一键清除</button>
+
+    <!-- 设置面板 -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">插件设置</div>
+                <button class="modal-close" id="closeSettings">×</button>
+            </div>
+            <!-- 通义千问 -->
+            <div class="form-group">
+                <label class="form-label" for="apiToken">API Token</label>
+                <input type="text" id="apiToken" class="form-input" placeholder="请输入您的 API Token，多个 Token 请用英文逗号分隔">
+                <div class="form-help">请输入通义千问API Token，多个Token请用英文逗号分隔，系统会随机选择一个使用</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">OCR 模型</label>
+                <select id="modelSelect" class="form-input">
+                    <option value="qwen2.5-vl-72b-instruct">加载中...</option>
+                </select>
+                <div class="form-help">选择用于 OCR 识别的模型，默认使用 Qwen2.5-VL-72B-Instruct</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="promptInput">自定义 Prompt [可选]</label>
+                <div class="prompt-header">
+                    <button class="btn btn-secondary prompt-add-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                        新增模板
+                    </button>
+                    <div class="prompt-template">
+                        <button class="btn btn-secondary prompt-template-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
+                                <path d="M3 2.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
+                            </svg>
+                            使用模板
+                        </button>
+                        <div class="prompt-template-dropdown">
+                            <div class="prompt-template-item" data-template="object-detection">
+                                <div class="template-header">
+                                    <span class="template-title">目标检测</span>
+                                    <button class="template-config-btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="template-desc">检测图像中的特定目标并返回坐标位置</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <textarea id="promptInput" class="form-input" rows="4" placeholder="可以自定义识别时的 Prompt，留空则使用默认设置"></textarea>
+            </div>
+            <!-- 新增翻译服务选择 -->
+            <div class="form-group">
+                <label class="form-label">翻译服务</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="translateService" value="deeplx" checked>
+                        DeepLX
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="translateService" value="openai">
+                        OpenAI
+                    </label>
+                </div>
+            </div>
+            <!-- DeepLX设置 -->
+            <div class="form-group translate-setting deeplx-setting">
+                <label class="form-label" for="deeplxUrl">DeepLX API URL</label>
+                <input type="text" id="deeplxUrl" class="form-input" placeholder="请输入 DeepLX API 地址，例如: https://api.deeplx.org/translate">
+                <div class="form-help">请输入 DeepLX API 服务地址，用于文本翻译功能</div>
+            </div>
+            <!-- OpenAI设置 -->
+            <div class="form-group translate-setting openai-setting" style="display:none">
+                <label class="form-label" for="openaiBaseUrl">API Base URL</label>
+                <input type="text" id="openaiBaseUrl" class="form-input" placeholder="https://api.openai.com/v1">
+                <div class="form-help">请输入 OpenAI API Base URL，默认为 https://api.openai.com/v1</div>
+
+                <label class="form-label" for="openaiKey">OpenAI API Key</label>
+                <input type="text" id="openaiKey" class="form-input" placeholder="sk-**************">
+                <div class="form-help">请输入 OpenAI API Key，用于文本翻译功能</div>
+
+                <label class="form-label" for="openaiModel">Model</label>
+                <input type="text" id="openaiModel" class="form-input" placeholder="gpt-4o-mini">
+                <div class="form-help">请输入要使用的 OpenAI 模型名称，默认为 gpt-4o-mini</div>
+            </div>
+            <button class="save-settings" id="saveSettings">保存设置</button>
+        </div>
     </div>
-  </div>
 
-  <!-- 设置面板 -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">插件设置</div>
-        <button class="modal-close" id="closeSettings">&times;</button>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="apiToken">API Token</label>
-        <input type="text" id="apiToken" class="form-input" placeholder="请输入您的 API Token，多个 Token 请用英文逗号分隔">
-        <div class="form-help">请输入通义千问API Token，多个Token请用英文逗号分隔，系统会随机选择一个使用</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="promptInput">自定义 Prompt [可选]</label>
-        <textarea id="promptInput" class="form-input" rows="4" placeholder="可以自定义识别时的 Prompt，留空则使用默认设置"></textarea>
-      </div>
-      <button class="save-settings" id="saveSettings">保存设置</button>
+    <!-- 保存模板对话框 -->
+    <div class="modal-overlay" id="saveTemplateModal">
+        <div class="modal template-config-modal">
+            <div class="modal-header">
+                <div class="modal-title">新增模板</div>
+                <button class="modal-close" id="closeSaveTemplate">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">模板名称</label>
+                <input type="text" id="templateName" class="form-input" placeholder="给你的模板起个名字">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Prompt 内容</label>
+                <textarea id="templatePrompt" class="form-input" rows="4" 
+                    placeholder="请输入模板的 Prompt 内容"></textarea>
+            </div>
+            <button class="save-settings" id="saveAsTemplate">保存模板</button>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // 等待 preload.js 加载完成
-    window.onload = () => {
-      if (!window.services) {
-        console.error('Services not initialized. Please check if preload.js is loaded correctly.');
-        alert('插件初始化失败，请检查开发者工具中的错误信息');
-        return;
-      }
+    <!-- Toast 通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
 
-      // 初始化变量
-      const uploadArea = document.getElementById('uploadArea');
-      const uploadText = document.getElementById('uploadText');
-      const resultDiv = document.getElementById('result');
-      const previewImage = document.getElementById('previewImage');
-      const copyBtn = document.getElementById('copyBtn');
-      const retranslateBtn = document.getElementById('retranslateBtn');
-      const settingsModal = document.getElementById('settingsModal');
-      const settingsBtn = document.getElementById('settingsBtn');
-      const closeSettings = document.getElementById('closeSettings');
-      const saveSettings = document.getElementById('saveSettings');
-      const apiToken = document.getElementById('apiToken');
-      const promptInput = document.getElementById('promptInput');
-      const loadingSpinner = document.getElementById('loadingSpinner');
-      const clearBtn = document.getElementById('clearBtn');
+    <!-- 添加模板配置对话框 -->
+    <div class="modal-overlay" id="templateConfigModal">
+        <div class="modal template-config-modal">
+            <div class="modal-header">
+                <div class="modal-title">配置检测模板</div>
+                <button class="modal-close" id="closeTemplateConfig">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">检测目标</label>
+                <input type="text" id="templateLabel" class="form-input" placeholder="例如：people riding motorcycles">
+            </div>
+            <div class="form-group">
+                <label class="form-label">子标签</label>
+                <input type="text" id="templateSubLabel" class="form-input" placeholder="例如：wearing a helmet, not wearing a helmet">
+                <div class="form-help">多个子标签请用英文逗号分隔</div>
+            </div>
+            <button class="save-settings" id="applyTemplate">应用模板</button>
+        </div>
+    </div>
 
-      let currentImageData = null;
-
-      // 从本地存储加载设置
-      function loadSettings() {
-        const settings = window.services.getSettings();
-        if (settings) {
-          apiToken.value = settings.tokens.join(',');
-          promptInput.value = settings.prompt || '';
-        }
-      }
-
-      // 保存设置到本地存储
-      function saveSettingsToStorage() {
-        const settings = {
-          tokens: apiToken.value.trim(),
-          prompt: promptInput.value.trim()
-        };
-        window.services.saveSettings(settings);
-        settingsModal.classList.remove('show');
-      }
-
-      // 处理图片识别
-      async function processImage(imageData) {
-        if (!imageData) return;
-        
-        const token = window.services.getRandomToken();
-        if (!token) {
-          settingsModal.classList.add('show');
-          return;
-        }
-
-        currentImageData = imageData;
-        
-        // 显示图片预览并隐藏提示文字
-        previewImage.src = imageData;
-        previewImage.style.display = 'block';
-        if (uploadText) {
-          uploadText.style.display = 'none';
-        }
-        resultDiv.innerHTML = '';
-        loadingSpinner.style.display = 'block';
-
-        try {
-          // 保存图片到临时文件
-          const imagePath = window.services.saveTempImage(imageData);
-
-          // 上传文件
-          const formData = new FormData();
-          formData.append('file', await fetch(imagePath).then(r => r.blob()));
-
-          const uploadResponse = await fetch('https://chat.qwenlm.ai/api/v1/files/', {
-            method: 'POST',
-            headers: {
-              'accept': 'application/json',
-              'authorization': `Bearer ${token}`,
-            },
-            body: formData,
-          });
-
-          const uploadData = await uploadResponse.json();
-          if (!uploadData.id) throw new Error('文件上传失败');
-
-          const prompt = promptInput.value.trim() || '请识别图片中的内容。对于数学公式和数学符号，请使用标准的LaTeX格式输出。' +
-                        '要求：\n' +
-                        '1. 所有数学公式和单个数学符号都要用LaTeX格式\n' +
-                        '2. 普通文本保持原样\n' +
-                        '3. 严格保持原文的段落格式和换行，不需要输出具体的换行符\\n，只需保持原文的样式\n' +
-                        '4. 对于代码块，请使用 markdown 格式输出，使用```包裹代码块';
-
-          // 调用识别 API
-          const recognizeResponse = await fetch('https://chat.qwenlm.ai/api/chat/completions', {
-            method: 'POST',
-            headers: {
-              'accept': '*/*',
-              'authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              stream: false,
-              model: 'qwen-vl-max-latest',
-              messages: [
-                {
-                  role: 'user',
-                  content: [
-                    {
-                      type: 'text',
-                      text: prompt
-                    },
-                    { type: 'image', image: uploadData.id },
-                  ],
-                },
-              ],
-              session_id: '1',
-              chat_id: '2',
-              id: '3',
-            }),
-          });
-
-          const recognizeData = await recognizeResponse.json();
-          const result = recognizeData.choices[0]?.message?.content || '识别失败';
-
-          // 处理结果
-          resultDiv.innerHTML = result
-            .replace(/\\（/g, '\\(')
-            .replace(/\\）/g, '\\)')
-            .replace(/\n{3,}/g, '\n\n')
-            .replace(/([^\n])\n([^\n])/g, '$1\n$2')
-            .trim();
-
-          // 渲染数学公式
-          MathJax.typesetPromise([resultDiv]);
-
-        } catch (error) {
-          resultDiv.textContent = '处理失败: ' + error.message;
-        } finally {
-          loadingSpinner.style.display = 'none';
-        }
-      }
-
-      // 将处理函数暴露到全局，供 preload.js 调用
-      window.processPluginImage = processImage;
-
-      // 文件拖放处理
-      uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-      });
-
-      uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-      });
-
-      uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            processImage(e.target.result);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // 点击上传
-      uploadArea.addEventListener('click', () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-          const file = e.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              processImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
-          }
-        };
-        input.click();
-      });
-
-      // 粘贴处理
-      document.addEventListener('paste', (e) => {
-        const file = e.clipboardData.files[0];
-        if (file && file.type.startsWith('image/')) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            processImage(e.target.result);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // 复制结果功能
-      copyBtn.addEventListener('click', () => {
-        const result = resultDiv.textContent;
-        window.services.copyToClipboard(result);
-        copyBtn.textContent = '已复制';
-        copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = '一键复制';
-          copyBtn.classList.remove('copied');
-        }, 2000);
-      });
-
-      // 重新识别功能
-      retranslateBtn.addEventListener('click', () => {
-        if (currentImageData) {
-          resultDiv.innerHTML = '';
-          loadingSpinner.style.display = 'block';
-          processImage(currentImageData).finally(() => {
-            loadingSpinner.style.display = 'none';
-          });
-        }
-      });
-
-      // 打开设置面板
-      settingsBtn.addEventListener('click', () => {
-        loadSettings();
-        settingsModal.classList.add('show');
-      });
-
-      // 关闭设置面板
-      closeSettings.addEventListener('click', () => {
-        settingsModal.classList.remove('show');
-      });
-
-      // 点击遮罩层关闭
-      settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) {
-          settingsModal.classList.remove('show');
-        }
-      });
-
-      // 保存设置
-      saveSettings.addEventListener('click', saveSettingsToStorage);
-
-      // 一键清除功能
-      clearBtn.addEventListener('click', () => {
-        currentImageData = null;
-        previewImage.src = '';
-        previewImage.style.display = 'none';
-        uploadText.style.display = 'block';
-        resultDiv.innerHTML = '';
-      });
-
-      // 初始化时加载设置
-      loadSettings();
-
-      // uTools 插件入口
-      window.exports = {
-        'qwen_ocr': {
-          mode: 'none',
-          args: {
-            enter: (action) => {
-              // 如果是拖拽或选择的图片
-              if (action.type === 'img') {
-                const imagePath = action.payload[0];
-                const imageData = window.services.readImageAsBase64(imagePath);
-                processImage(imageData);
-              }
-            }
-          }
-        }
-      }
-    };
-  </script>
+    <script type="module" src="js/main.js"></script>
 </body>
-</html> 
+</html>

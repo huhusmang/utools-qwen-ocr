@@ -1,23 +1,33 @@
 {
-  "name": "qwen-ocr",
-  "version": "0.1.0",
-  "pluginName": "Qwen OCR",
-  "description": "基于通义千问大模型的智能 OCR 识别工具",
+  "name": "QwenOCR",
+  "version": "1.0.0",
+  "pluginName": "QwenOCR",
+  "description": "基于通义千问大模型的智能OCR识别工具",
   "main": "index.html",
   "logo": "logo.png",
   "preload": "preload.js",
   "features": [
     {
       "code": "qwen_ocr",
-      "explain": "通义千问 OCR 识别",
+      "explain": "Qwen OCR 识别",
       "cmds": [
         "qwen",
         "ocr",
         "识别",
+        "截图文字识别",
         "文字识别",
         {
           "type": "img",
           "label": "OCR 识别图片"
+        },
+        "图片文字识别",
+        {
+          "type": "files",
+          "label": "提取图片文字",
+          "fileType": "file",
+          "match": "/\\.(jpg|jpeg|png|gif|bmp)$/i",
+          "minLength": 1,
+          "maxLength": 1
         }
       ]
     }

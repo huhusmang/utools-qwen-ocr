@@ -74,16 +74,17 @@
 
 1. 获取通义千问 API Token：
    - 访问 [通义千问开放平台](https://chat.qwenlm.ai)
-   - F12 打开控制台-应用，token 字段就是需要的 key
+   - F12 打开控制台-Fetch/XHR，搜索 `completion`
+   - **只需复制 `Authorization` 字段值中 `Bearer ` 后面的内容！！！**
 ![token](images/get_token.png)
 
-2. 配置插件：
+1. 配置插件：
    - 点击插件界面的"插件设置"
    - 填入 API Token（支持多个 Token，用英文逗号分隔）
    - 选择 OCR 识别模型（默认为 qwen2.5-vl-72b-instruct）
    - 可选：自定义识别 Prompt
 
-3. 高级功能：
+2. 高级功能：
    - 自定义模板：可以创建和保存自定义 Prompt 模板
    - 多语言翻译：支持将识别结果翻译为多种语言，需配置 OpenAI 格式的 API Key
 

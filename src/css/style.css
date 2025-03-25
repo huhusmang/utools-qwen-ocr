@@ -656,10 +656,10 @@
     bottom: 100%;
     right: 20px;
     margin-bottom: 10px;
-    background-color: #ffffff;
+    background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px var(--shadow-color);
     min-width: 120px;
     z-index: 1000;
     opacity: 0;
@@ -935,8 +935,21 @@
   
   @media (prefers-color-scheme: dark) {
     .translate-dropdown {
-      background-color: #0f172a;
-      border-color: #334155;
+      background: var(--bg-primary);
+      border-color: var(--border-color);
+    }
+
+    .translate-dropdown-item {
+      color: var(--text-primary);
+    }
+
+    .translate-dropdown-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .translate-dropdown-item.active {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
     }
   }
   

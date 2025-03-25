@@ -61,7 +61,7 @@ export class Translate {
 
     try {
       if (!window.ocr.currentOcrText) {
-        window.utils.showToast('请先进行OCR识别', 'error');
+        window.utils.showToast('请先进行 OCR 识别', 'error');
         return;
       }
 
@@ -69,13 +69,13 @@ export class Translate {
       const translateService = settings.translateService || 'deeplx';
 
       if (translateService === 'deeplx' && !settings.deeplxUrl) {
-        window.utils.showToast('请先设置DeepLX API地址', 'error');
+        window.utils.showToast('请先设置 DeepLX API 地址', 'error');
         window.settings.settingsModal.classList.add('show');
         return;
       }
 
-      if (translateService === 'openai' && !settings.openaiKey) {
-        window.utils.showToast('请先设置OpenAI API Key', 'error');
+      if (translateService === 'openai' && !settings.translationApiKey) {
+        window.utils.showToast('请先设置 OpenAI API Key', 'error');
         window.settings.settingsModal.classList.add('show');
         return;
       }
@@ -98,15 +98,15 @@ export class Translate {
         try {
           await MathJax.typesetPromise([this.resultDiv]);
         } catch (error) {
-          console.error('数学公式渲染失败:', error);
+          console.error('数学公式渲染失败：', error);
           window.utils.showToast('数学公式渲染失败，但翻译结果已保存', 'warning');
         }
       }
 
       window.utils.showToast('翻译完成', 'success');
     } catch (error) {
-      console.error('翻译错误:', error);
-      window.utils.showToast(`翻译失败: ${error.message}`, 'error');
+      console.error('翻译错误：', error);
+      window.utils.showToast(`翻译失败：${error.message}`, 'error');
     } finally {
       this.isTranslating = false;
       this.loadingSpinner.style.display = 'none';
@@ -128,7 +128,7 @@ export class Translate {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`翻译请求失败: ${errorText}`);
+      throw new Error(`翻译请求失败：${errorText}`);
     }
 
     const data = await response.json();
@@ -140,9 +140,9 @@ export class Translate {
 
   async translateWithOpenAI(settings) {
     const targetLangMap = {
-      'ZH': '请将以下文本翻译成中文，保持所有LaTeX公式和代码块格式不变，保持原文的段落结构：\n',
+      'ZH': '请将以下文本翻译成中文，保持所有 LaTeX 公式和代码块格式不变，保持原文的段落结构：\n',
       'EN': 'Please translate the following text into English, keep all LaTeX formulas and code blocks unchanged, maintain the original paragraph structure:\n',
-      'JA': '以下の文章を日本語に翻訳してください。LaTeX数式とコードブロックの形式を保持し、原文の段落構造を維持してください：\n',
+      'JA': '以下の文章を日本語に翻訳してください。LaTeX 数式とコードブロックの形式を保持し、原文の段落構造を維持してください：\n',
       'KO': '다음 텍스트를 한국어로 번역하되, 모든 LaTeX 수식과 코드 블록 형식을 유지하고 원문의 단락 구조를 유지하십시오:\n',
       'FR': 'Veuillez traduire le texte suivant en français, en conservant toutes les formules LaTeX et les blocs de code, et en maintenant la structure des paragraphes:\n',
       'DE': 'Bitte übersetzen Sie den folgenden Text ins Deutsche, behalten Sie alle LaTeX-Formeln und Codeblöcke bei und bewahren Sie die Absatzstruktur:\n',
@@ -150,10 +150,10 @@ export class Translate {
       'RU': 'Переведите следующий текст на русский язык, сохраняя все формулы LaTeX и блоки кода, поддерживая структуру абзацев:\n'
     };
 
-    const response = await fetch(`${settings.openaiBaseUrl || 'https://api.openai.com/v1'}/chat/completions`, {
+    const response = await fetch(`${settings.translationBaseUrl || 'https://api.openai.com/v1'}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${settings.openaiKey}`,
+        'Authorization': `Bearer ${settings.translationApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -161,7 +161,7 @@ export class Translate {
         messages: [
           {
             role: 'system',
-            content: '你是一个专业的翻译助手。在翻译时：1. 保持所有LaTeX公式不变 2. 保持所有代码块格式不变 3. 保持原文的段落结构 4. 保持原文的换行方式'
+            content: '你是一个专业的翻译助手。在翻译时：1. 保持所有 LaTeX 公式不变 2. 保持所有代码块格式不变 3. 保持原文的段落结构 4. 保持原文的换行方式'
           },
           {
             role: 'user',

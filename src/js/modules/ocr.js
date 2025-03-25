@@ -1,4 +1,4 @@
-// OCR识别相关功能
+// OCR 识别相关功能
 export class OCR {
   constructor() {
     this.resultDiv = document.getElementById('result');
@@ -20,6 +20,24 @@ export class OCR {
     });
   }
 
+  // 将图片数据转换为 base64
+  async imageToBase64(imageData) {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        // 移除 data:image/png;base64, 前缀
+        const base64 = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+        resolve(base64);
+      };
+      img.src = imageData;
+    });
+  }
+
   async processImage(imageData) {
     if (!imageData) return;
 
@@ -32,83 +50,70 @@ export class OCR {
 
     try {
       if (!window.services) {
-        window.utils.showToast('服务初始化失败，请检查preload.js是否正确加载', 'error');
+        window.utils.showToast('服务初始化失败，请检查 preload.js 是否正确加载', 'error');
         return;
       }
 
-      const token = window.services.getRandomToken();
-      if (!token) {
-        window.utils.showToast('请先设置API Token', 'error');
+      const settings = window.services.getSettings();
+      if (!settings.ocrBaseUrl || !settings.ocrApiKey) {
+        window.utils.showToast('请先设置 OCR API Base URL 和 API Key', 'error');
         window.settings.settingsModal.classList.add('show');
         return;
       }
 
-      // 保存图片到临时文件
-      const imagePath = window.services.saveTempImage(imageData);
+      // 将图片转换为 base64
+      const base64Image = await this.imageToBase64(imageData);
 
-      // 上传文件
-      const formData = new FormData();
-      formData.append('file', await fetch(imagePath).then(r => r.blob()));
-
-      const uploadResponse = await fetch('https://chat.qwenlm.ai/api/v1/files/', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const uploadData = await uploadResponse.json();
-      if (!uploadData.id) throw new Error('文件上传失败');
-
-      const settings = window.services.getSettings();
-      const prompt = settings.prompt || '请识别图片中的内容。对于数学公式和数学符号，请使用标准的LaTeX格式输出。' +
+      const prompt = settings.prompt || '请识别图片中的内容。对于数学公式和数学符号，请使用标准的 LaTeX 格式输出。' +
         '要求：\n' +
-        '1. 所有数学公式和单个数学符号都要用LaTeX格式\n' +
+        '1. 所有数学公式和单个数学符号都要用 LaTeX 格式\n' +
         '2. 普通文本保持原样\n' +
         '3. 严格保持原文的段落格式和换行，不需要输出具体的换行符\\n，只需保持原文的样式\n' +
         '4. 对于代码块，请使用 markdown 格式输出，使用```包裹代码块';
 
-      const model = settings.model || 'qwen2.5-vl-72b-instruct';
-
-      // 调用识别 API
-      const recognizeResponse = await fetch('https://chat.qwenlm.ai/api/chat/completions', {
-        // 请求时将credentials设置为omit，避免跨域请求时携带cookie，否则会导致鉴权失败
-        credentials: 'omit',
+      // 调用 OpenAI 兼容的 API 进行识别
+      const response = await fetch(`${settings.ocrBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          'Accept': '*/*',
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${settings.ocrApiKey}`,
         },
         body: JSON.stringify({
-          stream: false,
-          model: model,
+          model: settings.ocrModelName || 'qwen2.5-vl-32b-instruct',
           messages: [
+            {
+              role: 'system',
+              content: [
+                {
+                  type: 'text',
+                  text: 'You are a helpful assistant.'
+                }
+              ]
+            },
             {
               role: 'user',
               content: [
                 {
-                  type: 'text',
-                  text: prompt,
-                  chat_type: "t2t",
-                  feature_config: {
-                    thinking_enabled: false
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/png;base64,${base64Image}`
                   }
                 },
                 {
-                  type: 'image',
-                  image: uploadData.id
-                },
-              ],
-            },
+                  type: 'text',
+                  text: prompt
+                }
+              ]
+            }
           ]
-        }),
+        })
       });
 
-      const recognizeData = await recognizeResponse.json();
+      if (!response.ok) {
+        throw new Error(`API 请求失败：${response.status} ${response.statusText}`);
+      }
+
+      const recognizeData = await response.json();
       const result = recognizeData.choices[0]?.message?.content || '识别失败';
       this.currentOcrText = result;
 
@@ -126,7 +131,7 @@ export class OCR {
       }
 
     } catch (error) {
-      window.utils.showToast(`处理失败: ${error.message}`, 'error');
+      window.utils.showToast(`处理失败：${error.message}`, 'error');
       this.resultDiv.textContent = '';
     } finally {
       this.loadingSpinner.style.display = 'none';

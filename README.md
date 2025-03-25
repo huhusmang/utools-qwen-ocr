@@ -72,16 +72,11 @@
 
 ## ⚙️ 配置说明
 
-1. 获取通义千问 API Token：
-   - 访问 [通义千问开放平台](https://chat.qwenlm.ai)
-   - F12 打开控制台-Fetch/XHR，搜索 `completion`
-   - **只需复制 `Authorization` 字段值中 `Bearer ` 后面的内容！！！**
-![token](images/get_token.png)
-
 1. 配置插件：
    - 点击插件界面的"插件设置"
-   - 填入 API Token（支持多个 Token，用英文逗号分隔）
-   - 选择 OCR 识别模型（默认为 qwen2.5-vl-72b-instruct）
+   - 填入用于 OCR 识别和翻译的 API base URL 和 API Token（请选择兼容 OpenAI 格式的 API）
+   - 填入**支持视觉识别**的模型（默认为 qwen2.5-vl-32b-instruct）
+   - 填入翻译模型（默认为 gpt-4o-mini）
    - 可选：自定义识别 Prompt
 
 2. 高级功能：
@@ -109,7 +104,6 @@ MIT License
 
 ## 🙏 鸣谢
 
-- [通义千问开放平台](https://chat.qwenlm.ai)
 - [uTools](https://u.tools)
 - [ocr-based-qwen](https://github.com/Cunninger/ocr-based-qwen)
 - [Qwen2API](https://github.com/Rfym21/Qwen2API)

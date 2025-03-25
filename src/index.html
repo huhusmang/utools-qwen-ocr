@@ -47,7 +47,7 @@
                 </button>
             </div>
 
-            <!-- OCR功能组 -->
+            <!-- OCR 功能组 -->
             <div class="button-group">
                 <button class="btn btn-primary" id="screenshotBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -106,89 +106,117 @@
     <div class="modal-overlay" id="settingsModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">插件设置</div>
-                <button class="modal-close" id="closeSettings">×</button>
+                <h2 class="modal-title">插件设置</h2>
+                <button class="modal-close" id="closeSettings">&times;</button>
             </div>
-            <!-- 通义千问 -->
-            <div class="form-group">
-                <label class="form-label" for="apiToken">API Token</label>
-                <input type="text" id="apiToken" class="form-input" placeholder="请输入您的 API Token，多个 Token 请用英文逗号分隔">
-                <div class="form-help">请输入通义千问API Token，多个Token请用英文逗号分隔，系统会随机选择一个使用</div>
-            </div>
-            <div class="form-group">
-                <label class="form-label">OCR 模型</label>
-                <select id="modelSelect" class="form-input">
-                    <option value="qwen2.5-vl-72b-instruct">加载中...</option>
-                </select>
-                <div class="form-help">选择用于 OCR 识别的模型，默认使用 Qwen2.5-VL-72B-Instruct</div>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="promptInput">自定义 Prompt [可选]</label>
-                <div class="prompt-header">
-                    <button class="btn btn-secondary prompt-add-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            <!-- OCR 服务设置 -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15M4 9v5h-.581m0 0a8.003 8.003 0 0015.357 2H15m4 0v5"></path>
                         </svg>
-                        新增模板
-                    </button>
-                    <div class="prompt-template">
-                        <button class="btn btn-secondary prompt-template-btn">
+                    </div>
+                    <h3 class="settings-section-title">OCR 服务设置</h3>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ocrBaseUrl">API Base URL</label>
+                    <input type="text" id="ocrBaseUrl" class="form-input" placeholder="https://dashscope.aliyuncs.com/compatible-mode/v1">
+                    <div class="form-help">请输入兼容 OpenAI 格式的 API Base URL</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ocrApiKey">API Key</label>
+                    <input type="text" id="ocrApiKey" class="form-input" placeholder="sk-******">
+                    <!-- <div class="form-help">请输入 API Key</div> -->
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="ocrModelName">模型名称</label>
+                    <input type="text" id="ocrModelName" class="form-input" placeholder="qwen2.5-vl-32b-instruct">
+                    <div class="form-help">请输入支持视觉的模型，默认为 qwen2.5-vl-32b-instruct</div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="promptInput">自定义 Prompt [可选]</label>
+                    <div class="prompt-header">
+                        <button class="btn btn-secondary prompt-add-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
-                                <path d="M3 2.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                             </svg>
-                            使用模板
+                            新增模板
                         </button>
-                        <div class="prompt-template-dropdown">
-                            <div class="prompt-template-item" data-template="object-detection">
-                                <div class="template-header">
-                                    <span class="template-title">目标检测</span>
-                                    <button class="template-config-btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
-                                        </svg>
-                                    </button>
+                        <div class="prompt-template">
+                            <button class="btn btn-secondary prompt-template-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M3 4.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
+                                    <path d="M3 2.5h10a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2zm0 1a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1H3z"/>
+                                </svg>
+                                使用模板
+                            </button>
+                            <div class="prompt-template-dropdown">
+                                <div class="prompt-template-item" data-template="object-detection">
+                                    <div class="template-header">
+                                        <span class="template-title">目标检测</span>
+                                        <button class="template-config-btn">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="template-desc">检测图像中的特定目标并返回坐标位置</div>
                                 </div>
-                                <div class="template-desc">检测图像中的特定目标并返回坐标位置</div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <textarea id="promptInput" class="form-input" rows="4" placeholder="可以自定义识别时的 Prompt，留空则使用默认设置"></textarea>
-            </div>
-            <!-- 新增翻译服务选择 -->
-            <div class="form-group">
-                <label class="form-label">翻译服务</label>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="translateService" value="deeplx" checked>
-                        DeepLX
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="translateService" value="openai">
-                        OpenAI
-                    </label>
+                    <textarea id="promptInput" class="form-input" rows="4" placeholder="可以自定义识别时的 Prompt，留空则使用默认设置"></textarea>
                 </div>
             </div>
-            <!-- DeepLX设置 -->
-            <div class="form-group translate-setting deeplx-setting">
-                <label class="form-label" for="deeplxUrl">DeepLX API URL</label>
-                <input type="text" id="deeplxUrl" class="form-input" placeholder="请输入 DeepLX API 地址，例如: https://api.deeplx.org/translate">
-                <div class="form-help">请输入 DeepLX API 服务地址，用于文本翻译功能</div>
-            </div>
-            <!-- OpenAI设置 -->
-            <div class="form-group translate-setting openai-setting" style="display:none">
-                <label class="form-label" for="openaiBaseUrl">API Base URL</label>
-                <input type="text" id="openaiBaseUrl" class="form-input" placeholder="https://api.openai.com/v1">
-                <div class="form-help">请输入 OpenAI API Base URL，默认为 https://api.openai.com/v1</div>
 
-                <label class="form-label" for="openaiKey">OpenAI API Key</label>
-                <input type="text" id="openaiKey" class="form-input" placeholder="sk-**************">
-                <div class="form-help">请输入 OpenAI API Key，用于文本翻译功能</div>
-
-                <label class="form-label" for="openaiModel">Model</label>
-                <input type="text" id="openaiModel" class="form-input" placeholder="gpt-4o-mini">
-                <div class="form-help">请输入要使用的 OpenAI 模型名称，默认为 gpt-4o-mini</div>
+            <!-- 翻译服务设置 -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <div class="settings-section-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                        </svg>
+                    </div>
+                    <h3 class="settings-section-title">翻译服务设置</h3>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">翻译服务类型</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="translateService" value="deeplx" checked>
+                            DeepLX
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="translateService" value="openai">
+                            OpenAI
+                        </label>
+                    </div>
+                </div>
+                <!-- DeepLX 设置 -->
+                <div class="form-group translate-setting deeplx-setting">
+                    <label class="form-label" for="deeplxUrl">API Base URL</label>
+                    <input type="text" id="deeplxUrl" class="form-input" placeholder="https://api.deeplx.org/translate">
+                    <div class="form-help">DeepLX API 服务地址</div>
+                </div>
+                <!-- OpenAI 翻译设置 -->
+                <div class="translate-setting openai-setting" style="display:none">
+                    <div class="form-group">
+                        <label class="form-label" for="translationBaseUrl">API Base URL</label>
+                        <input type="text" id="translationBaseUrl" class="form-input" placeholder="https://api.openai.com/v1">
+                        <div class="form-help">请输入兼容 OpenAI 格式的 API Base URL</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="translationApiKey">API Key</label>
+                        <input type="text" id="translationApiKey" class="form-input" placeholder="sk-******">
+                        <!-- <div class="form-help">API Key</div> -->
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="translationModelName">模型名称</label>
+                        <input type="text" id="translationModelName" class="form-input" placeholder="gpt-4o-mini">
+                        <div class="form-help">模型名称，默认为 gpt-4o-mini</div>
+                    </div>
+                </div>
             </div>
             <button class="save-settings" id="saveSettings">保存设置</button>
         </div>
@@ -236,6 +264,14 @@
             <button class="save-settings" id="applyTemplate">应用模板</button>
         </div>
     </div>
+
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" title="切换主题">
+        <svg xmlns="http://www.w3.org/2000/svg" class="theme-toggle-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path class="sun-icon" d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path>
+            <path class="moon-icon" d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+        </svg>
+    </button>
 
     <script type="module" src="js/main.js"></script>
 </body>

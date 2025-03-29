@@ -157,7 +157,7 @@ export class Translate {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: settings.openaiModel || 'gpt-4o-mini',
+        model: settings.translationModelName || 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
